@@ -1,7 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config(); // This line loads your .env file
+
+console.log("CWD:", process.cwd());
+
+// Load .env from the same directory as this file
+require('dotenv').config({ path: __dirname + '/.env', override: true });
+
+console.log(`MONGO_URI after dotenv: [${process.env.MONGO_URI}]`);
 
 const formRoutes = require('./routes/formRoutes');
 
@@ -14,24 +20,21 @@ app.use(express.json());
 // Routes
 app.use('/api', formRoutes);
 
-// Get the MongoDB URI from environment variables
 const MONGO_URI = process.env.MONGO_URI;
 const PORT = process.env.PORT || 4000;
 
 if (!MONGO_URI) {
     console.error('FATAL ERROR: MONGO_URI is not defined in the environment variables.');
-    process.exit(1); // Exit the application if the database string is missing
+    process.exit(1);
 }
 
-// Database Connection
 mongoose.connect(MONGO_URI)
-    
-  .then(() => {
-    console.log('✅ Successfully connected to MongoDB');
-    app.listen(PORT, () => {
-      console.log(`✅ Server running on port ${PORT}`);
+    .then(() => {
+        console.log('✅ Successfully connected to MongoDB');
+        app.listen(PORT, () => {
+            console.log(`✅ Server running on port ${PORT}`);
+        });
+    })
+    .catch((error) => {
+        console.error('❌ Connection error:', error.message);
     });
-  })
-  .catch((error) => {
-    console.error('❌ Connection error:', error.message);
-  });
